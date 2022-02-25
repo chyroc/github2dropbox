@@ -34,9 +34,4 @@ runs:
   env:
     DROPBOX_TOKEN: "${{ inputs.DROPBOX_TOKEN }}"
     DROPBOX_PATH: "${{ inputs.DROPBOX_PATH }}"
-    ENABLE_STAR: "${{ inputs.ENABLE_STAR }}"
-    ENABLE_FOLLOWER: "${{ inputs.ENABLE_FOLLOWER }}"
-    ENABLE_FOLLOWING: "${{ inputs.ENABLE_FOLLOWING }}"
-    ENABLE_GIST: "${{ inputs.ENABLE_GIST }}"
-    ENABLE_ISSUE: "${{ inputs.ENABLE_ISSUE }}"
-    ENABLE_REPO: "${{ inputs.ENABLE_REPO }}"
+
