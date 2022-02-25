@@ -13,6 +13,9 @@ inputs:
   ENABLE_REPO:
     description: "Enable Repo Backup"
     required: false
+  ENABLE_REPO_GIT:
+    description: "Enable Repo Git Backup"
+    required: false
   ENABLE_STAR:
     description: "Enable Star Backup"
     required: false
@@ -28,15 +31,9 @@ inputs:
   ENABLE_ISSUE:
     description: "Enable Issue Backup"
     required: false
+  ENABLE_ISSUE_COMMENT:
+    description: "Enable Issue Comment Backup"
+    required: false
 runs:
   using: docker
   image: Dockerfile
-  env:
-    DROPBOX_TOKEN: "${{ inputs.DROPBOX_TOKEN }}"
-    DROPBOX_PATH: "${{ inputs.DROPBOX_PATH }}"
-    ENABLE_STAR: "${{ inputs.ENABLE_STAR }}"
-    ENABLE_FOLLOWER: "${{ inputs.ENABLE_FOLLOWER }}"
-    ENABLE_FOLLOWING: "${{ inputs.ENABLE_FOLLOWING }}"
-    ENABLE_GIST: "${{ inputs.ENABLE_GIST }}"
-    ENABLE_ISSUE: "${{ inputs.ENABLE_ISSUE }}"
-    ENABLE_REPO: "${{ inputs.ENABLE_REPO }}"
