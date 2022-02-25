@@ -1,5 +1,8 @@
 name: github2dropbox
 description: "Backup GitHub Data to DropBox"
+branding:
+  icon: "save"
+  color: blue
 inputs:
   GITHUB_TOKEN:
     description: "Access Token to GitHub"
