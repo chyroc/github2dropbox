@@ -3,6 +3,7 @@
 Backup GitHub Data to DropBox: [View on Marketplace](https://github.com/marketplace/actions/github2dropbox)
 
 Support:
+
 - Star
 - Follower
 - Following
@@ -10,7 +11,7 @@ Support:
 - Issue
 - Issue Comment
 - Gist
-- [ ] .git
+- .git
 
 ## Usage
 
