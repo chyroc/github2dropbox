@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 60 # timeout after 60 minutes
     steps:
       - name: Backup
-        uses: chyroc/github2dropbox@a423fe2
+        uses: chyroc/github2dropbox@v0.2.0
         with:
           DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }} # dropbox token
           GITHUB_TOKEN: ${{ secrets.G_TOKEN }} # github token
