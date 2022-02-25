@@ -79,6 +79,9 @@ func (r *Backup) SaveIssue(repo *github.Repository) error {
 		fmt.Printf("[%s] get data, fail: %s\n", title, err)
 		return err
 	}
+	if len(dataList) == 0 {
+		return nil
+	}
 	fmt.Printf("[%s] get data, count: %d\n", title, len(dataList))
 
 	dir := filepath.Dir(r.repoIssueJsonPath(repo, dataList[0]))
@@ -109,6 +112,9 @@ func saveDataList[T any](
 	if err != nil {
 		fmt.Printf("[%s] get data, fail: %s\n", title, err)
 		return err
+	}
+	if len(dataList) == 0 {
+		return nil
 	}
 	fmt.Printf("[%s] get data, count: %d\n", title, len(dataList))
 
