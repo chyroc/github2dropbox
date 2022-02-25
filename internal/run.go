@@ -50,7 +50,7 @@ func (r *Backup) DownloadMeta() error {
 func (r *Backup) SaveRepos(enableRepoGit, issuesEnabled, issuesEnabledComment bool) error {
 	return saveDataList(r, backupRepos, r.AllRepo, r.repoJsonPath, 1, func(data *github.Repository) {
 		r.SaveRepoZip(data)
-		_ = r.internalSaveRepoExt(data, enableRepoGit, issuesEnabled, issuesEnabledComment)
+		r.internalSaveRepoExt(data, enableRepoGit, issuesEnabled, issuesEnabledComment)
 	})
 }
 
