@@ -1,4 +1,4 @@
-FROM golang:1.17.7-alpine3.15
+FROM golang:1.18rc1-alpine3.15
 RUN apk add git
 
 COPY . /home/src
