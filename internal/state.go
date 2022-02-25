@@ -39,6 +39,8 @@ func (r *Backup) getProcessedRecentlyByTitle(title string) map[string]*LastProce
 		return r.meta.Followings
 	case backupRepos:
 		return r.meta.Repos
+	case backupGists:
+		return r.meta.Gists
 	default:
 		panic(fmt.Sprintf("unknown title: %s", title))
 	}
@@ -51,6 +53,8 @@ const (
 	backupRepos      = "repos"
 	backupGists      = "gists"
 )
+
+const disableCheckDropbox = -1
 
 func (r *Backup) setProcessedRecentlyByTitle(title, name string) {
 	switch title {

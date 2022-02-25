@@ -24,12 +24,13 @@ type Option struct {
 	DropboxCli   string
 	GithubToken  string
 
-	EnableStar      bool
-	EnableFollower  bool
-	EnableFollowing bool
-	EnableRepo      bool
-	EnableGist      bool
-	EnableIssue     bool
+	EnableStar         bool
+	EnableFollower     bool
+	EnableFollowing    bool
+	EnableRepo         bool
+	EnableGist         bool
+	EnableIssue        bool
+	EnableIssueComment bool
 }
 
 func NewBackup(option *Option) *Backup {

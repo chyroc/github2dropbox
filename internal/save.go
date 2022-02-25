@@ -15,7 +15,11 @@ func (r *Backup) repoJsonPath(repo *github.Repository) string {
 }
 
 func (r *Backup) repoIssueJsonPath(repo *github.Repository, issue *github.Issue) string {
-	return fmt.Sprintf("%s/%s/repo/%s/issue/%d.json", r.BackupDir, r.self.GetLogin(), repo.GetName(), issue.GetID())
+	return fmt.Sprintf("%s/%s/repo/%s/issue/%d/%d.json", r.BackupDir, r.self.GetLogin(), repo.GetName(), issue.GetID(), issue.GetID())
+}
+
+func (r *Backup) repoIssueCommentJsonPath(repo *github.Repository, issue *github.Issue, comment *github.IssueComment) string {
+	return fmt.Sprintf("%s/%s/repo/%s/issue/%d/comment/%d.json", r.BackupDir, r.self.GetLogin(), repo.GetName(), issue.GetID(), comment.GetID())
 }
 
 func (r *Backup) starJsonPath(star *github.StarredRepository) string {

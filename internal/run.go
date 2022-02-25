@@ -32,7 +32,7 @@ func (r *Backup) Run() {
 		fmt.Println("Following is disabled")
 	}
 	if r.EnableRepo {
-		_ = r.SaveRepos(r.EnableIssue)
+		_ = r.SaveRepos(r.EnableIssue, r.EnableIssueComment)
 	} else {
 		fmt.Println("Repo is disabled")
 	}
@@ -47,12 +47,10 @@ func (r *Backup) DownloadMeta() error {
 	return r.Download(r.metaPath())
 }
 
-func (r *Backup) SaveRepos(issuesEnabled bool) error {
+func (r *Backup) SaveRepos(issuesEnabled, issuesEnabledComment bool) error {
 	return saveDataList(r, backupRepos, r.AllRepo, r.repoJsonPath, 1, func(data *github.Repository) {
 		r.SaveRepoZip(data)
-		if issuesEnabled {
-			_ = r.SaveIssue(data)
-		}
+		_ = r.internalSaveIssue(data, issuesEnabled, issuesEnabledComment)
 	})
 }
 
@@ -72,32 +70,25 @@ func (r *Backup) SaveGist() error {
 	return saveDataList(r, backupGists, r.AllGist, r.gistJsonPath, 0)
 }
 
-func (r *Backup) SaveIssue(repo *github.Repository) error {
-	title := "issues"
-	dataList, err := r.AllIssueByRepo(repo)
-	if err != nil {
-		fmt.Printf("[%s] get data, fail: %s\n", title, err)
-		return err
-	}
-	if len(dataList) == 0 {
+func (r *Backup) internalSaveIssue(repo *github.Repository, issuesEnabled, issuesEnabledComment bool) error {
+	if !issuesEnabled {
 		return nil
 	}
-	fmt.Printf("[%s] get data, count: %d\n", title, len(dataList))
 
-	dir := filepath.Dir(r.repoIssueJsonPath(repo, dataList[0]))
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return err
-	}
-
-	// save json
-	{
-		for _, v := range dataList {
-			jsonPath := r.repoIssueJsonPath(repo, v)
-			saveData(title, getPathBaseName(jsonPath), jsonPath, v)
+	return saveDataList(r, "issues", func() ([]*github.Issue, error) {
+		return r.AllIssueByRepo(repo)
+	}, func(issue *github.Issue) string {
+		return r.repoIssueJsonPath(repo, issue)
+	}, disableCheckDropbox, func(issue *github.Issue) {
+		if !issuesEnabledComment {
+			return
 		}
-	}
-
-	return nil
+		_ = saveDataList(r, "issue_comments", func() ([]*github.IssueComment, error) {
+			return r.AllIssueComment(repo.GetName(), int(issue.GetID()))
+		}, func(comment *github.IssueComment) string {
+			return r.repoIssueCommentJsonPath(repo, issue, comment)
+		}, disableCheckDropbox)
+	})
 }
 
 func saveDataList[T any](
@@ -129,15 +120,18 @@ func saveDataList[T any](
 			jsonPath := genPath(v)
 			name := getPathBaseName(jsonPath)
 
-			if r.isProcessedRecentlyBYTitle(title, name) {
-				fmt.Printf("[%s:%s] processed recently, skip\n", title, name)
-				continue
+			if uploadDepth >= 0 {
+				if r.isProcessedRecentlyBYTitle(title, name) {
+					fmt.Printf("[%s:%s] processed recently, skip\n", title, name)
+					continue
+				}
 			}
 
 			saveData(title, name, jsonPath, v, additionalFunc...)
-			r.setProcessedRecentlyByTitle(title, name)
 
 			if uploadDepth >= 0 {
+				r.setProcessedRecentlyByTitle(title, name)
+
 				if err = r.Upload(genUploadPath(jsonPath, uploadDepth)); err != nil {
 					fmt.Printf("[%s] upload to dropbox fail[ignore err]: %s\n", title, err)
 				} else {

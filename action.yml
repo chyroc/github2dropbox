@@ -28,6 +28,9 @@ inputs:
   ENABLE_ISSUE:
     description: "Enable Issue Backup"
     required: false
+  ENABLE_ISSUE_COMMENT:
+    description: "Enable Issue Comment Backup"
+    required: false
 runs:
   using: docker
   image: Dockerfile

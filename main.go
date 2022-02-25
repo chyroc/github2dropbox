@@ -23,6 +23,7 @@ func NewOption() *internal.Option {
 	r.EnableFollowing = os.Getenv("INPUT_ENABLE_FOLLOWING") == "true"
 	r.EnableGist = os.Getenv("INPUT_ENABLE_GIST") == "true"
 	r.EnableIssue = os.Getenv("INPUT_ENABLE_ISSUE") == "true"
+	r.EnableIssueComment = os.Getenv("ENABLE_ISSUE_COMMENT") == "true"
 
 	if r.DropboxToken == "" {
 		r.DropboxToken = os.Getenv("INPUT_DROPBOX_TOKEN")
