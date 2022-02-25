@@ -1,10 +1,16 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 func (r *Backup) Run() {
+	_ = r.SaveFollower()
+	_ = r.SaveFollowing()
 	_ = r.SaveStar()
 	_ = r.SaveRepos()
 }
@@ -42,27 +48,64 @@ func (r *Backup) SaveRepos() error {
 }
 
 func (r *Backup) SaveStar() error {
-	if r.IsStarProcessedRecently() {
-		fmt.Printf("[star] processed recently, skip\n")
+	return saveDataList(r, "star", r.meta.Star, func(lp *LastProcessed) {
+		r.meta.Star = lp
+	}, r.AllStar, r.starJsonPath)
+}
+
+func (r *Backup) SaveFollower() error {
+	return saveDataList(r, "follower", r.meta.Follower, func(lp *LastProcessed) {
+		r.meta.Follower = lp
+	}, r.AllFollower, r.followerJsonPath)
+}
+
+func (r *Backup) SaveFollowing() error {
+	return saveDataList(r, "following", r.meta.Following, func(lp *LastProcessed) {
+		r.meta.Follower = lp
+	}, r.AllFollowing, r.followingJsonPath)
+}
+
+func saveDataList[T any](r *Backup,
+	title string,
+	lastProcessed *LastProcessed,
+	setLastProcessed func(lp *LastProcessed),
+	listFunc func() ([]T, error),
+	genPath func(T) string,
+) error {
+	if r.isProcessedRecently(lastProcessed) {
+		fmt.Printf("[%s] processed recently, skip\n", title)
 		return nil
 	}
 
-	stars, err := r.AllStar()
+	dataList, err := listFunc()
 	if err != nil {
 		return err
 	}
-	fmt.Printf("[star] get star, count: %d\n", len(stars))
+	fmt.Printf("[%s] get data, count: %d\n", title, len(dataList))
 
-	if err = r.SaveStarsJson(stars); err != nil {
-		fmt.Printf("[star] save json fail: %s\n", err)
+	dir := filepath.Dir(genPath(dataList[0]))
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
-	r.SetStarProcessedRecently()
 
-	if err = r.Upload(r.starJsonDirPath()); err != nil {
-		fmt.Printf("[star] upload to dropbox fail[ignore err]: %s\n", err)
+	// save json
+	{
+		for _, v := range dataList {
+			bs, err := json.MarshalIndent(v, "", "  ")
+			if err != nil {
+				fmt.Printf("[%s] save json fail: %s\n", title, err)
+				return err
+			}
+			_ = ioutil.WriteFile(genPath(v), bs, 0o644)
+		}
+	}
+
+	setLastProcessed(r.genProcessedRecently())
+
+	if err = r.Upload(dir); err != nil {
+		fmt.Printf("[%s] upload to dropbox fail[ignore err]: %s\n", title, err)
 	} else {
-		fmt.Printf("[star] upload to dropbox success\n")
+		fmt.Printf("[%s] upload to dropbox success\n", title)
 	}
 
 	return r.UploadMeta()

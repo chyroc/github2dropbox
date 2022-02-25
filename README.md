@@ -71,9 +71,9 @@ GitHub/
 ## TODO
 
 - [ ] issue
-- [ ] star
-- [ ] followers
-- [ ] following
+- [x] star
+- [x] followers
+- [x] following
 - [ ] local hash && not download all dropbox data
 
 ## Change Log

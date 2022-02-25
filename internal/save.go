@@ -24,6 +24,14 @@ func (r *Backup) starJsonPath(star *github.StarredRepository) string {
 	return fmt.Sprintf("%s/%s/star/%s.json", r.backupDir, r.self.GetLogin(), strings.ReplaceAll(star.GetRepository().GetFullName(), "/", "_"))
 }
 
+func (r *Backup) followerJsonPath(user *github.User) string {
+	return fmt.Sprintf("%s/%s/follower/%s.json", r.backupDir, r.self.GetLogin(), user.GetLogin())
+}
+
+func (r *Backup) followingJsonPath(user *github.User) string {
+	return fmt.Sprintf("%s/%s/following/%s.json", r.backupDir, r.self.GetLogin(), user.GetLogin())
+}
+
 func (r *Backup) starJsonDirPath() string {
 	return fmt.Sprintf("%s/%s/star", r.backupDir, r.self.GetLogin())
 }

@@ -47,6 +47,40 @@ func (r *Backup) AllStar() ([]*github.StarredRepository, error) {
 	return stars, nil
 }
 
+func (r *Backup) AllFollower() ([]*github.User, error) {
+	page := 1
+	var stars []*github.User
+	for page > 0 {
+		starredRepository, resp, err := r.githubClient.Users.ListFollowers(context.Background(), "", &github.ListOptions{
+			Page:    page,
+			PerPage: 100,
+		})
+		if err != nil {
+			return nil, err
+		}
+		stars = append(stars, starredRepository...)
+		page = resp.NextPage
+	}
+	return stars, nil
+}
+
+func (r *Backup) AllFollowing() ([]*github.User, error) {
+	page := 1
+	var stars []*github.User
+	for page > 0 {
+		starredRepository, resp, err := r.githubClient.Users.ListFollowing(context.Background(), "", &github.ListOptions{
+			Page:    page,
+			PerPage: 100,
+		})
+		if err != nil {
+			return nil, err
+		}
+		stars = append(stars, starredRepository...)
+		page = resp.NextPage
+	}
+	return stars, nil
+}
+
 func (r *Backup) SelfUser() (*github.User, error) {
 	user, _, err := r.githubClient.Users.Get(context.Background(), "")
 	return user, err

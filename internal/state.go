@@ -14,8 +14,10 @@ type LastProcessed struct {
 }
 
 type Meta struct {
-	Star  *LastProcessed            `json:"star"`
-	Repos map[string]*LastProcessed `json:"repos"`
+	Star      *LastProcessed            `json:"star"`
+	Follower  *LastProcessed            `json:"follower"`
+	Following *LastProcessed            `json:"following"`
+	Repos     map[string]*LastProcessed `json:"repos"`
 }
 
 func (r *Backup) IsRepoProcessedRecently(repoName string) bool {
