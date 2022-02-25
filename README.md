@@ -74,6 +74,7 @@ GitHub/
 - [x] star
 - [x] followers
 - [x] following
+- [ ] gist
 - [ ] local hash && not download all dropbox data
 
 ## Change Log

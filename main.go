@@ -17,6 +17,13 @@ func NewOption() *internal.Option {
 	r.DropboxToken = os.Getenv("DROPBOX_TOKEN_BACKUP")
 	r.BackupDir = "GitHub"
 
+	r.EnableRepo = os.Getenv("ENABLE_REPO") == "true"
+	r.EnableStar = os.Getenv("ENABLE_STAR") == "true"
+	r.EnableFollower = os.Getenv("ENABLE_FOLLOWER") == "true"
+	r.EnableFollowing = os.Getenv("ENABLE_FOLLOWING") == "true"
+	r.EnableGist = os.Getenv("ENABLE_GIST") == "true"
+	r.EnableIssue = os.Getenv("ENABLE_ISSUE") == "true"
+
 	if r.GithubToken == "" {
 		r.GithubToken = os.Getenv("GITHUB_TOKEN")
 	}
@@ -33,7 +40,8 @@ func NewOption() *internal.Option {
 }
 
 func main() {
-	r := internal.NewBackup(NewOption())
+	opt := NewOption()
+	r := internal.NewBackup(opt)
 
 	r.Run()
 }

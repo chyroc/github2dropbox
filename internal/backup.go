@@ -23,6 +23,13 @@ type Option struct {
 	DropboxPath  string
 	DropboxCli   string
 	GithubToken  string
+
+	EnableStar      bool
+	EnableFollower  bool
+	EnableFollowing bool
+	EnableRepo      bool
+	EnableGist      bool
+	EnableIssue     bool
 }
 
 func NewBackup(option *Option) *Backup {

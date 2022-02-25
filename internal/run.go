@@ -16,17 +16,38 @@ func (r *Backup) Run() {
 		return
 	}
 
-	_ = r.SaveStar()
-	_ = r.SaveFollower()
-	_ = r.SaveFollowing()
-	_ = r.SaveRepos()
+	if r.EnableStar {
+		_ = r.SaveStar()
+	} else {
+		fmt.Println("Star is disabled")
+	}
+	if r.EnableFollower {
+		_ = r.SaveFollower()
+	} else {
+		fmt.Println("Follower is disabled")
+	}
+	if r.EnableFollowing {
+		_ = r.SaveFollowing()
+	} else {
+		fmt.Println("Following is disabled")
+	}
+	if r.EnableRepo {
+		_ = r.SaveRepos(r.EnableIssue)
+	} else {
+		fmt.Println("Repo is disabled")
+	}
+	if r.EnableGist {
+
+	} else {
+		fmt.Println("Gist is disabled")
+	}
 }
 
 func (r *Backup) DownloadMeta() error {
 	return r.Download(r.metaPath())
 }
 
-func (r *Backup) SaveRepos() error {
+func (r *Backup) SaveRepos(issuesEnabled bool) error {
 	return saveDataList(r, backupRepos, r.AllRepo, r.repoJsonPath, 1, func(data *github.Repository) {
 		r.SaveRepoZip(data)
 	})
