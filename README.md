@@ -2,6 +2,16 @@
 
 Backup GitHub Data to DropBox: [View on Marketplace](https://github.com/marketplace/actions/github2dropbox)
 
+Support:
+- Star
+- Follower
+- Following
+- Repo
+- Issue
+- Issue Comment
+- Gist
+- [ ] .git
+
 ## Usage
 
 ### 1. Create a new repository to run backup action
@@ -67,15 +77,6 @@ GitHub/
     github2dropbox/
       meta.json
 ```
-
-## TODO
-
-- [ ] issue
-- [x] star
-- [x] followers
-- [x] following
-- [ ] gist
-- [ ] local hash && not download all dropbox data
 
 ## Change Log
 
