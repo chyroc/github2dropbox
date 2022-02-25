@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/chyroc/github2dropbox/internal"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func NewOption() *internal.Option {
@@ -40,6 +41,7 @@ func NewOption() *internal.Option {
 }
 
 func main() {
+	spew.Dump(os.Environ())
 	opt := NewOption()
 	r := internal.NewBackup(opt)
 
