@@ -93,7 +93,7 @@ func saveDataList[T any](
 
 			if r.isProcessedRecentlyBYTitle(title, name) {
 				fmt.Printf("[%s:%s] processed recently, skip\n", title, name)
-				return nil
+				continue
 			}
 
 			saveData(title, name, jsonPath, v, additionalFunc...)
