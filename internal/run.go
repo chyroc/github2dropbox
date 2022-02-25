@@ -37,7 +37,7 @@ func (r *Backup) Run() {
 		fmt.Println("Repo is disabled")
 	}
 	if r.EnableGist {
-
+		_ = r.SaveGist()
 	} else {
 		fmt.Println("Gist is disabled")
 	}
@@ -50,6 +50,9 @@ func (r *Backup) DownloadMeta() error {
 func (r *Backup) SaveRepos(issuesEnabled bool) error {
 	return saveDataList(r, backupRepos, r.AllRepo, r.repoJsonPath, 1, func(data *github.Repository) {
 		r.SaveRepoZip(data)
+		if issuesEnabled {
+			_ = r.SaveIssue(data)
+		}
 	})
 }
 
@@ -63,6 +66,35 @@ func (r *Backup) SaveFollower() error {
 
 func (r *Backup) SaveFollowing() error {
 	return saveDataList(r, backupFollowings, r.AllFollowing, r.followingJsonPath, 0)
+}
+
+func (r *Backup) SaveGist() error {
+	return saveDataList(r, backupGists, r.AllGist, r.gistJsonPath, 0)
+}
+
+func (r *Backup) SaveIssue(repo *github.Repository) error {
+	title := "issues"
+	dataList, err := r.AllIssueByRepo(repo)
+	if err != nil {
+		fmt.Printf("[%s] get data, fail: %s\n", title, err)
+		return err
+	}
+	fmt.Printf("[%s] get data, count: %d\n", title, len(dataList))
+
+	dir := filepath.Dir(r.repoIssueJsonPath(repo, dataList[0]))
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+
+	// save json
+	{
+		for _, v := range dataList {
+			jsonPath := r.repoIssueJsonPath(repo, v)
+			saveData(title, getPathBaseName(jsonPath), jsonPath, v)
+		}
+	}
+
+	return nil
 }
 
 func saveDataList[T any](
@@ -99,13 +131,15 @@ func saveDataList[T any](
 			saveData(title, name, jsonPath, v, additionalFunc...)
 			r.setProcessedRecentlyByTitle(title, name)
 
-			if err = r.Upload(genUploadPath(jsonPath, uploadDepth)); err != nil {
-				fmt.Printf("[%s] upload to dropbox fail[ignore err]: %s\n", title, err)
-			} else {
-				fmt.Printf("[%s] upload to dropbox success\n", title)
-			}
+			if uploadDepth >= 0 {
+				if err = r.Upload(genUploadPath(jsonPath, uploadDepth)); err != nil {
+					fmt.Printf("[%s] upload to dropbox fail[ignore err]: %s\n", title, err)
+				} else {
+					fmt.Printf("[%s] upload to dropbox success\n", title)
+				}
 
-			_ = r.UploadMeta()
+				_ = r.UploadMeta()
+			}
 		}
 	}
 

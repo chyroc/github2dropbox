@@ -3,7 +3,6 @@ module github.com/chyroc/github2dropbox
 go 1.18
 
 require (
-	github.com/davecgh/go-spew v1.1.0
 	github.com/google/go-github/v42 v42.0.0
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
 )

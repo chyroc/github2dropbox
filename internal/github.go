@@ -102,6 +102,25 @@ func (r *Backup) AllFollowing() ([]*github.User, error) {
 	return stars, nil
 }
 
+func (r *Backup) AllGist() ([]*github.Gist, error) {
+	page := 1
+	var dataList []*github.Gist
+	for page > 0 {
+		starredRepository, resp, err := r.GithubClient.Gists.List(context.Background(), r.self.GetLogin(), &github.GistListOptions{
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: 100,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		dataList = append(dataList, starredRepository...)
+		page = resp.NextPage
+	}
+	return dataList, nil
+}
+
 func (r *Backup) SelfUser() (*github.User, error) {
 	user, _, err := r.GithubClient.Users.Get(context.Background(), "")
 	return user, err

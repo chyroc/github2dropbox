@@ -18,6 +18,7 @@ type Meta struct {
 	Followers  map[string]*LastProcessed `json:"followers"`
 	Followings map[string]*LastProcessed `json:"followings"`
 	Repos      map[string]*LastProcessed `json:"repos"`
+	Gists      map[string]*LastProcessed `json:"gists"`
 }
 
 func (r *Backup) IsRepoProcessedRecently(repoName string) bool {
@@ -30,13 +31,13 @@ func (r *Backup) SetRepoProcessedRecently(repoName string) {
 
 func (r *Backup) getProcessedRecentlyByTitle(title string) map[string]*LastProcessed {
 	switch title {
-	case "stars":
+	case backupStars:
 		return r.meta.Stars
-	case "followers":
+	case backupFollowers:
 		return r.meta.Followers
-	case "followings":
+	case backupFollowings:
 		return r.meta.Followings
-	case "repos":
+	case backupRepos:
 		return r.meta.Repos
 	default:
 		panic(fmt.Sprintf("unknown title: %s", title))
@@ -48,6 +49,7 @@ const (
 	backupFollowers  = "followers"
 	backupFollowings = "followings"
 	backupRepos      = "repos"
+	backupGists      = "gists"
 )
 
 func (r *Backup) setProcessedRecentlyByTitle(title, name string) {
@@ -72,6 +74,11 @@ func (r *Backup) setProcessedRecentlyByTitle(title, name string) {
 			r.meta.Repos = make(map[string]*LastProcessed)
 		}
 		r.meta.Repos[name] = r.genProcessedRecently()
+	case backupGists:
+		if r.meta.Gists == nil {
+			r.meta.Gists = make(map[string]*LastProcessed)
+		}
+		r.meta.Gists[name] = r.genProcessedRecently()
 	default:
 		panic(fmt.Sprintf("unknown title: %s", title))
 	}
