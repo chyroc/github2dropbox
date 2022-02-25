@@ -1,5 +1,5 @@
 FROM golang:1.18rc1-alpine3.15
-RUN apk add git
+RUN apk add git ssh
 
 COPY . /home/src
 WORKDIR /home/src
