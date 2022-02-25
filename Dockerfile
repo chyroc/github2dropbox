@@ -1,5 +1,5 @@
 FROM golang:1.18rc1-alpine3.15
-RUN apk add git openssh-client
+RUN apk add git openssh-client zip
 
 COPY . /home/src
 WORKDIR /home/src
