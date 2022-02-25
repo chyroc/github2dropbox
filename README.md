@@ -56,6 +56,14 @@ jobs:
         with:
           DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }} # dropbox token
           GITHUB_TOKEN: ${{ secrets.G_TOKEN }} # github token
+          ENABLE_REPO: true # enable repo backup
+          ENABLE_STAR: true # enable star backup
+          ENABLE_FOLLOWER: true # enable follower backup
+          ENABLE_FOLLOWING: true # enable following backup
+          ENABLE_GIST: true # enable gist backup
+          ENABLE_ISSUE: true # enable issue backup(need ENABLE_REPO=true)
+          ENABLE_ISSUE_COMMENT: true # enable issue comment backup(need ENABLE_REPO=true)
+          ENABLE_REPO_GIT: true # enable repo .git folder backup(need ENABLE_REPO=true)
 ```
 
 ## Backup File Structure
