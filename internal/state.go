@@ -43,10 +43,12 @@ func (r *Backup) getProcessedRecentlyByTitle(title string) map[string]*LastProce
 	}
 }
 
-const backupStars = "stars"
-const backupFollowers = "followers"
-const backupFollowings = "followings"
-const backupRepos = "repos"
+const (
+	backupStars      = "stars"
+	backupFollowers  = "followers"
+	backupFollowings = "followings"
+	backupRepos      = "repos"
+)
 
 func (r *Backup) setProcessedRecentlyByTitle(title, name string) {
 	switch title {

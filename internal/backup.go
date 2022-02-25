@@ -42,7 +42,8 @@ func NewBackup(option *Option) *Backup {
 			oauth2.NewClient(
 				context.Background(),
 				oauth2.StaticTokenSource(
-					&oauth2.Token{AccessToken: option.GithubToken})))}
+					&oauth2.Token{AccessToken: option.GithubToken}))),
+	}
 }
 
 func (r *Backup) Init() error {
