@@ -14,6 +14,10 @@ func (r *Backup) repoJsonPath(repo *github.Repository) string {
 	return fmt.Sprintf("%s/%s/repo/%s/%s.json", r.BackupDir, r.self.GetLogin(), repo.GetName(), repo.GetName())
 }
 
+func (r *Backup) repoGitZipPath(repo *github.Repository) string {
+	return fmt.Sprintf("%s/%s/repo/%s/%s.git.zip", r.BackupDir, r.self.GetLogin(), repo.GetName(), repo.GetName())
+}
+
 func (r *Backup) repoIssueJsonPath(repo *github.Repository, issue *github.Issue) string {
 	return fmt.Sprintf("%s/%s/repo/%s/issue/%d/%d.json", r.BackupDir, r.self.GetLogin(), repo.GetName(), issue.GetID(), issue.GetID())
 }

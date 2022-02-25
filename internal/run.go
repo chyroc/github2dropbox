@@ -89,7 +89,16 @@ func (r *Backup) internalSaveRepoExt(repo *github.Repository, enableRepoGit, iss
 	}
 
 	if enableRepoGit {
-		// TODO?
+		repoPath := fmt.Sprintf("/tmp/%s", repo.GetName())
+
+		// clone
+		if err := runCmd("git", []string{"clone", repo.GetCloneURL(), repoPath}); err != nil {
+			return err
+		}
+		// zip .git
+		if err := runCmd("zip", []string{"-r", r.repoGitZipPath(repo), repoPath + "/.git"}); err != nil {
+			return err
+		}
 	}
 
 	return nil
