@@ -67,7 +67,10 @@ GitHub/
         repo.json
         repo.zip
         issue/
-          <id.json>
+          <id>/
+            <id.json>
+            comment/
+              <id.json>
     star/
       <repo.json>
     follower/
