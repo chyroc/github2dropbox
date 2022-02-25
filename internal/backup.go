@@ -3,71 +3,64 @@ package internal
 import (
 	"context"
 	"errors"
-	"os"
-	"os/exec"
-	"strings"
+	"fmt"
 
 	"github.com/google/go-github/v42/github"
 	"golang.org/x/oauth2"
 )
 
 type Backup struct {
-	githubClient *github.Client
-	backupDir    string
-	dropboxToken string
-	dropboxPath  string
-	dropboxCli   string
-	self         *github.User
-	meta         *Meta
+	*Option
+	GithubClient *github.Client
+
+	self *github.User
+	meta *Meta
 }
 
-func NewBackup() *Backup {
-	cli := new(Backup)
+type Option struct {
+	BackupDir    string
+	DropboxToken string
+	DropboxPath  string
+	DropboxCli   string
+	GithubToken  string
+}
 
-	var (
-		dropboxCli   = "dropbox-cli"
-		dropboxPath  = strings.TrimRight(os.Getenv("INPUT_DROPBOX_PATH"), "/") + "/"
-		githubToken  = os.Getenv("INPUT_GITHUB_TOKEN")
-		dropboxToken = os.Getenv("DROPBOX_TOKEN")
-		backupDir    = "GitHub"
-	)
-	if githubToken == "" {
-		githubToken = os.Getenv("GITHUB_TOKEN")
+func NewBackup(option *Option) *Backup {
+	if option.DropboxToken == "" {
+		panic(errors.New("dropbox token is empty"))
 	}
-	if s, _ := exec.LookPath(dropboxCli); s != "" {
-		dropboxCli = s
-	} else {
-		dropboxCli = "/bin/dropbox-cli"
-	}
-
-	httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: githubToken},
-	))
-
-	cli.githubClient = github.NewClient(httpClient)
-	cli.backupDir = backupDir
-	cli.dropboxToken = dropboxToken
-	cli.dropboxPath = dropboxPath
-	cli.dropboxCli = dropboxCli
-
-	return cli
+	return &Backup{
+		Option: option,
+		GithubClient: github.NewClient(
+			oauth2.NewClient(
+				context.Background(),
+				oauth2.StaticTokenSource(
+					&oauth2.Token{AccessToken: option.GithubToken})))}
 }
 
 func (r *Backup) Init() error {
-	if r.dropboxToken == "" {
-		return errors.New("dropbox token is empty")
+	// GitHub user
+	{
+		user, err := r.SelfUser()
+		if err != nil {
+			fmt.Printf("get github user, fail: %s\n", err)
+			return err
+		}
+		r.self = user
+		if r.self.GetLogin() == "" {
+			fmt.Printf("get github user, fail: %s\n", "no name")
+			return errors.New("no name")
+		}
 	}
 
-	user, err := r.SelfUser()
-	if err != nil {
-		return err
+	// fetch meta json
+	{
+		if err := r.DownloadMeta(); err != nil {
+			fmt.Printf("download meta, fail: %s\n", err)
+			return err
+		}
+		r.meta = r.loadMeta()
 	}
-	r.self = user
-	if r.self.GetLogin() == "" {
-		return errors.New("No login found")
-	}
-
-	r.meta = r.loadMeta()
 
 	return nil
 }

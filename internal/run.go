@@ -6,79 +6,55 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/google/go-github/v42/github"
 )
 
 func (r *Backup) Run() {
+	if err := r.Init(); err != nil {
+		os.Exit(1)
+		return
+	}
+
+	_ = r.SaveStar()
 	_ = r.SaveFollower()
 	_ = r.SaveFollowing()
-	_ = r.SaveStar()
 	_ = r.SaveRepos()
 }
 
+func (r *Backup) DownloadMeta() error {
+	return r.Download(r.metaPath())
+}
+
 func (r *Backup) SaveRepos() error {
-	repos, err := r.AllRepo()
-	if err != nil {
-		fmt.Printf("[repo] get repo fail[ignore err]: %s\n", err)
-		return err
-	}
-	fmt.Printf("[repo] get repo, count: %d\n", len(repos))
-
-	for _, repo := range repos {
-		fmt.Printf("[repo:%s] start\n", repo.GetName())
-
-		if r.IsRepoProcessedRecently(repo.GetName()) {
-			fmt.Printf("[repo:%s] processed recently, skip\n", repo.GetName())
-			continue
-		}
-
-		r.SaveRepoJson(repo)
-		r.SaveRepoZip(repo)
-		r.SetRepoProcessedRecently(repo.GetName())
-
-		if err := r.Upload(r.repoPath(repo)); err != nil {
-			fmt.Printf("[repo:%s] upload to dropbox fail[ignore err]: %s\n", repo.GetName(), err)
-		} else {
-			fmt.Printf("[repo:%s] upload to dropbox success\n", repo.GetName())
-		}
-		// _ = r.UploadMeta()
-		fmt.Println(r.UploadMeta())
-	}
-
-	return nil
+	return saveDataList(r, backupRepos, r.AllRepo, r.repoJsonPath, 1, func(data *github.Repository) {
+		r.SaveRepoZip(data)
+	})
 }
 
 func (r *Backup) SaveStar() error {
-	return saveDataList(r, "star", r.meta.Star, func(lp *LastProcessed) {
-		r.meta.Star = lp
-	}, r.AllStar, r.starJsonPath)
+	return saveDataList(r, backupStars, r.AllStar, r.starJsonPath, 0)
 }
 
 func (r *Backup) SaveFollower() error {
-	return saveDataList(r, "follower", r.meta.Follower, func(lp *LastProcessed) {
-		r.meta.Follower = lp
-	}, r.AllFollower, r.followerJsonPath)
+	return saveDataList(r, backupFollowers, r.AllFollower, r.followerJsonPath, 0)
 }
 
 func (r *Backup) SaveFollowing() error {
-	return saveDataList(r, "following", r.meta.Following, func(lp *LastProcessed) {
-		r.meta.Follower = lp
-	}, r.AllFollowing, r.followingJsonPath)
+	return saveDataList(r, backupFollowings, r.AllFollowing, r.followingJsonPath, 0)
 }
 
-func saveDataList[T any](r *Backup,
+func saveDataList[T any](
+	r *Backup,
 	title string,
-	lastProcessed *LastProcessed,
-	setLastProcessed func(lp *LastProcessed),
 	listFunc func() ([]T, error),
 	genPath func(T) string,
+	uploadDepth int,
+	additionalFunc ...func(T),
 ) error {
-	if r.isProcessedRecently(lastProcessed) {
-		fmt.Printf("[%s] processed recently, skip\n", title)
-		return nil
-	}
-
 	dataList, err := listFunc()
 	if err != nil {
+		fmt.Printf("[%s] get data, fail: %s\n", title, err)
 		return err
 	}
 	fmt.Printf("[%s] get data, count: %d\n", title, len(dataList))
@@ -91,22 +67,51 @@ func saveDataList[T any](r *Backup,
 	// save json
 	{
 		for _, v := range dataList {
-			bs, err := json.MarshalIndent(v, "", "  ")
-			if err != nil {
-				fmt.Printf("[%s] save json fail: %s\n", title, err)
-				return err
+			jsonPath := genPath(v)
+			name := getPathBaseName(jsonPath)
+
+			if r.isProcessedRecentlyBYTitle(title, name) {
+				fmt.Printf("[%s:%s] processed recently, skip\n", title, name)
+				return nil
 			}
-			_ = ioutil.WriteFile(genPath(v), bs, 0o644)
+
+			saveData(title, name, jsonPath, v, additionalFunc...)
+			r.setProcessedRecentlyByTitle(title, name)
+
+			if err = r.Upload(genUploadPath(jsonPath, uploadDepth)); err != nil {
+				fmt.Printf("[%s] upload to dropbox fail[ignore err]: %s\n", title, err)
+			} else {
+				fmt.Printf("[%s] upload to dropbox success\n", title)
+			}
+
+			_ = r.UploadMeta()
 		}
 	}
 
-	setLastProcessed(r.genProcessedRecently())
+	return nil
+}
 
-	if err = r.Upload(dir); err != nil {
-		fmt.Printf("[%s] upload to dropbox fail[ignore err]: %s\n", title, err)
-	} else {
-		fmt.Printf("[%s] upload to dropbox success\n", title)
+func saveData[T any](title, name, jsonPath string, data T, additionalFunc ...func(T)) {
+	// json
+	{
+		bs, err := json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			fmt.Printf("[%s:%s] save json fail: %s\n", title, name, err)
+		} else {
+			_ = ioutil.WriteFile(jsonPath, bs, 0o644)
+		}
 	}
 
-	return r.UploadMeta()
+	// additional
+	for _, v := range additionalFunc {
+		v(data)
+	}
+}
+
+func genUploadPath(jsonPath string, depth int) string {
+	for depth > 0 {
+		depth--
+		jsonPath = filepath.Dir(jsonPath)
+	}
+	return jsonPath
 }

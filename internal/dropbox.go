@@ -8,23 +8,23 @@ import (
 	"path/filepath"
 )
 
-func (r *Backup) DownloadDropboxBackupDir() error {
-	return runCmd(r.dropboxCli,
+func (r *Backup) Download(path string) error {
+	return runCmd(r.DropboxCli,
 		[]string{
 			"download",
-			"--token", r.dropboxToken,
-			r.dropboxPath + r.backupDir, // remote path
-			r.backupDir,                 // local path
+			"--token", r.DropboxToken,
+			r.DropboxPath + path, // remote path
+			path,                 // local path
 		})
 }
 
 func (r *Backup) Upload(path string) error {
-	return runCmd(r.dropboxCli,
+	return runCmd(r.DropboxCli,
 		[]string{
 			"upload",
-			"--token", r.dropboxToken,
+			"--token", r.DropboxToken,
 			path,
-			r.dropboxPath + path,
+			r.DropboxPath + path,
 		})
 }
 
@@ -33,7 +33,7 @@ func (r *Backup) UploadMeta() error {
 	if err != nil {
 		return err
 	}
-	file := fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.backupDir, r.self.GetLogin())
+	file := fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.BackupDir, r.self.GetLogin())
 	if err = os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
 		return err
 	}
