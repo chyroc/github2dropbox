@@ -18,6 +18,7 @@ func NewOption() *internal.Option {
 	r.BackupDir = "GitHub"
 
 	r.EnableRepo = os.Getenv("INPUT_ENABLE_REPO") == "true"
+	r.EnableRepoGit = os.Getenv("ENABLE_REPO_GIT") == "true"
 	r.EnableStar = os.Getenv("INPUT_ENABLE_STAR") == "true"
 	r.EnableFollower = os.Getenv("INPUT_ENABLE_FOLLOWER") == "true"
 	r.EnableFollowing = os.Getenv("INPUT_ENABLE_FOLLOWING") == "true"

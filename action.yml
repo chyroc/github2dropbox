@@ -13,6 +13,9 @@ inputs:
   ENABLE_REPO:
     description: "Enable Repo Backup"
     required: false
+  ENABLE_REPO_GIT:
+    description: "Enable Repo Git Backup"
+    required: false
   ENABLE_STAR:
     description: "Enable Star Backup"
     required: false

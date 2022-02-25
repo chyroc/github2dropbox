@@ -32,7 +32,7 @@ func (r *Backup) Run() {
 		fmt.Println("Following is disabled")
 	}
 	if r.EnableRepo {
-		_ = r.SaveRepos(r.EnableIssue, r.EnableIssueComment)
+		_ = r.SaveRepos(r.EnableRepoGit, r.EnableIssue, r.EnableIssueComment)
 	} else {
 		fmt.Println("Repo is disabled")
 	}
@@ -47,10 +47,10 @@ func (r *Backup) DownloadMeta() error {
 	return r.Download(r.metaPath())
 }
 
-func (r *Backup) SaveRepos(issuesEnabled, issuesEnabledComment bool) error {
+func (r *Backup) SaveRepos(enableRepoGit, issuesEnabled, issuesEnabledComment bool) error {
 	return saveDataList(r, backupRepos, r.AllRepo, r.repoJsonPath, 1, func(data *github.Repository) {
 		r.SaveRepoZip(data)
-		_ = r.internalSaveIssue(data, issuesEnabled, issuesEnabledComment)
+		_ = r.internalSaveRepoExt(data, enableRepoGit, issuesEnabled, issuesEnabledComment)
 	})
 }
 
@@ -70,25 +70,29 @@ func (r *Backup) SaveGist() error {
 	return saveDataList(r, backupGists, r.AllGist, r.gistJsonPath, 0)
 }
 
-func (r *Backup) internalSaveIssue(repo *github.Repository, issuesEnabled, issuesEnabledComment bool) error {
-	if !issuesEnabled {
-		return nil
+func (r *Backup) internalSaveRepoExt(repo *github.Repository, enableRepoGit, issuesEnabled, issuesEnabledComment bool) error {
+	if issuesEnabled {
+		return saveDataList(r, "issues", func() ([]*github.Issue, error) {
+			return r.AllIssueByRepo(repo)
+		}, func(issue *github.Issue) string {
+			return r.repoIssueJsonPath(repo, issue)
+		}, disableCheckDropbox, func(issue *github.Issue) {
+			if !issuesEnabledComment {
+				return
+			}
+			_ = saveDataList(r, "issue_comments", func() ([]*github.IssueComment, error) {
+				return r.AllIssueComment(repo.GetName(), int(issue.GetID()))
+			}, func(comment *github.IssueComment) string {
+				return r.repoIssueCommentJsonPath(repo, issue, comment)
+			}, disableCheckDropbox)
+		})
 	}
 
-	return saveDataList(r, "issues", func() ([]*github.Issue, error) {
-		return r.AllIssueByRepo(repo)
-	}, func(issue *github.Issue) string {
-		return r.repoIssueJsonPath(repo, issue)
-	}, disableCheckDropbox, func(issue *github.Issue) {
-		if !issuesEnabledComment {
-			return
-		}
-		_ = saveDataList(r, "issue_comments", func() ([]*github.IssueComment, error) {
-			return r.AllIssueComment(repo.GetName(), int(issue.GetID()))
-		}, func(comment *github.IssueComment) string {
-			return r.repoIssueCommentJsonPath(repo, issue, comment)
-		}, disableCheckDropbox)
-	})
+	if enableRepoGit {
+		// TODO?
+	}
+
+	return nil
 }
 
 func saveDataList[T any](

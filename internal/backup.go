@@ -28,6 +28,7 @@ type Option struct {
 	EnableFollower     bool
 	EnableFollowing    bool
 	EnableRepo         bool
+	EnableRepoGit      bool
 	EnableGist         bool
 	EnableIssue        bool
 	EnableIssueComment bool
