@@ -11,8 +11,20 @@ import (
 	"github.com/google/go-github/v42/github"
 )
 
+func (r *Backup) repoPath(repo *github.Repository) string {
+	return fmt.Sprintf("%s/%s/repo/%s", r.backupDir, r.self.GetLogin(), repo.GetName())
+}
+
+func (r *Backup) repoJsonPath(repo *github.Repository) string {
+	return fmt.Sprintf("%s/%s/repo/%s/repo.json", r.backupDir, r.self.GetLogin(), repo.GetName())
+}
+
+func (r *Backup) repoZipPath(repo *github.Repository) string {
+	return fmt.Sprintf("%s/%s/repo/%s/repo.zip", r.backupDir, r.self.GetLogin(), repo.GetName())
+}
+
 func (r *Backup) SaveRepoJson(repo *github.Repository) {
-	file := fmt.Sprintf("%s/%s/repo.json", r.backupDir, repo.GetName())
+	file := r.repoJsonPath(repo)
 	_ = os.MkdirAll(filepath.Dir(file), 0o755)
 	bs, err := json.MarshalIndent(repo, "", "  ")
 	if err != nil {
@@ -21,12 +33,12 @@ func (r *Backup) SaveRepoJson(repo *github.Repository) {
 	_ = ioutil.WriteFile(file, bs, 0o644)
 }
 
-func (r *Backup) SaveZipFile(repo *github.Repository) {
+func (r *Backup) SaveRepoZip(repo *github.Repository) {
+	file := r.repoZipPath(repo)
 	link, _, err := r.githubClient.Repositories.GetArchiveLink(context.Background(), *repo.Owner.Login, *repo.Name, github.Zipball, &github.RepositoryContentGetOptions{}, true)
 	if err != nil {
 		return
 	}
-	file := fmt.Sprintf("%s/%s/repo.zip", r.backupDir, repo.GetName())
 	_ = os.MkdirAll(filepath.Dir(file), 0o755)
 	err = downloadFile(file, link.String())
 	return

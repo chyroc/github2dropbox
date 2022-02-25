@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/chyroc/github2dropbox/internal"
 )
@@ -9,32 +10,14 @@ import (
 func main() {
 	r := internal.NewBackup()
 
-	fmt.Println("start download dropbox old data")
-	_ = r.DownloadDropboxBackupDir()
-
-	repos, err := r.AllRepo()
+	err := r.Init()
 	if err != nil {
-		panic(err)
+		fmt.Printf("[backup] init fail: %s\n", err)
+		os.Exit(1)
 	}
 
-	for _, repo := range repos {
-		fmt.Printf("[%s] start\n", repo.GetName())
-		if r.IsProcessedRecently(repo.GetName()) {
-			fmt.Printf("[%s] processed recently, skip\n", repo.GetName())
-			continue
-		}
+	// fmt.Println("start download dropbox old data")
+	// _ = r.DownloadDropboxBackupDir()
 
-		r.SaveRepoJson(repo)
-		fmt.Printf("[%s] save repo json\n", repo.GetName())
-
-		r.SaveZipFile(repo)
-		fmt.Printf("[%s] save zip file\n", repo.GetName())
-
-		_ = r.SetProcessedRecently(repo.GetName())
-
-		fmt.Printf("[%s] upload to dropbox\n", repo.GetName())
-		if err := r.UploadRepo(repo); err != nil {
-			panic(err)
-		}
-	}
+	r.Run()
 }

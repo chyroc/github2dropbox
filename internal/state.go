@@ -8,56 +8,46 @@ import (
 	"time"
 )
 
-type Meta struct {
+type LastProcessed struct {
 	LastProcessedAt      int64  `json:"last_processed_at"`
 	LastProcessedAtTitle string `json:"last_processed_at_title"`
 }
 
-func (r *Backup) IsProcessedRecently(repoName string) bool {
-	file := fmt.Sprintf("%s/%s/meta.json", r.backupDir, repoName)
-	bs, err := ioutil.ReadFile(file)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-		_ = os.RemoveAll(file)
-		return false
-	}
-
-	var meta Meta
-	err = json.Unmarshal(bs, &meta)
-	if err != nil {
-		_ = os.RemoveAll(file)
-		return false
-	}
-
-	if meta.LastProcessedAt == 0 {
-		return false
-	}
-	if time.Now().Unix()-meta.LastProcessedAt < 60*60*24 {
-		return true
-	}
-	return false
+type Meta struct {
+	Star  *LastProcessed            `json:"star"`
+	Repos map[string]*LastProcessed `json:"repos"`
 }
 
-func (r *Backup) SetProcessedRecently(repoName string) error {
-	file := fmt.Sprintf("%s/%s/meta.json", r.backupDir, repoName)
+func (r *Backup) IsRepoProcessedRecently(repoName string) bool {
+	return r.isProcessedRecently(r.meta.Repos[repoName])
+}
+
+func (r *Backup) SetRepoProcessedRecently(repoName string) {
+	r.meta.Repos[repoName] = r.genProcessedRecently()
+}
+
+func (r *Backup) metaPath() string {
+	return fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.backupDir, r.self.GetLogin())
+}
+
+func (r *Backup) loadMeta() *Meta {
+	file := r.metaPath()
+	var meta = Meta{Repos: map[string]*LastProcessed{}}
+
 	bs, err := ioutil.ReadFile(file)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return err
-		}
-	}
-
-	var meta Meta
-	err = json.Unmarshal(bs, &meta)
-	if err != nil {
+		_ = os.RemoveAll(file)
+	} else if err = json.Unmarshal(bs, &meta); err != nil {
 		_ = os.RemoveAll(file)
 	}
 
-	meta.LastProcessedAt = time.Now().Unix()
-	meta.LastProcessedAtTitle = time.Now().Format("2006-01-02 15:04:05")
-	bs, err = json.MarshalIndent(meta, "", "  ")
+	return &meta
+}
+
+func (r *Backup) saveMeta(meta *Meta) error {
+	file := r.metaPath()
+
+	bs, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -67,4 +57,20 @@ func (r *Backup) SetProcessedRecently(repoName string) error {
 		return err
 	}
 	return nil
+}
+
+func (r *Backup) isProcessedRecently(lp *LastProcessed) bool {
+	if lp == nil || lp.LastProcessedAt == 0 {
+		return false
+	}
+
+	return time.Now().Unix()-lp.LastProcessedAt < 60*60*24
+}
+
+func (r *Backup) genProcessedRecently() *LastProcessed {
+	now := time.Now()
+	return &LastProcessed{
+		LastProcessedAt:      now.Unix(),
+		LastProcessedAtTitle: now.Format("2006-01-02 15:04:05"),
+	}
 }

@@ -27,3 +27,8 @@ func (r *Backup) AllRepo() ([]*github.Repository, error) {
 	}
 	return resp, nil
 }
+
+func (r *Backup) SelfUser() (*github.User, error) {
+	user, _, err := r.githubClient.Users.Get(context.Background(), "")
+	return user, err
+}

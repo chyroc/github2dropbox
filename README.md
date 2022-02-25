@@ -47,11 +47,33 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.G_TOKEN }} # github token
 ```
 
+## Backup File Structure
+
+```text
+GitHub/
+  <username>/
+    repo/
+      <repo>/
+        repo.json
+        repo.zip
+        issue/
+          <id.json>
+    star/
+      <repo.json>
+    follower/
+      <user.json>
+    following/
+      <user.json>
+    github2dropbox/
+      meta.json
+```
+
 ## TODO
 
 - [ ] issue
 - [ ] star
-- [ ] follow
+- [ ] followers
+- [ ] following
 - [ ] local hash && not download all dropbox data
 
 ## Change Log
