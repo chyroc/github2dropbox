@@ -70,9 +70,9 @@ func (r *Backup) SaveGist() error {
 	return saveDataList(r, backupGists, r.AllGist, r.gistJsonPath, 0)
 }
 
-func (r *Backup) internalSaveRepoExt(repo *github.Repository, enableRepoGit, issuesEnabled, issuesEnabledComment bool) error {
+func (r *Backup) internalSaveRepoExt(repo *github.Repository, enableRepoGit, issuesEnabled, issuesEnabledComment bool) {
 	if issuesEnabled {
-		return saveDataList(r, "issues", func() ([]*github.Issue, error) {
+		_ = saveDataList(r, "issues", func() ([]*github.Issue, error) {
 			return r.AllIssueByRepo(repo)
 		}, func(issue *github.Issue) string {
 			return r.repoIssueJsonPath(repo, issue)
@@ -89,19 +89,21 @@ func (r *Backup) internalSaveRepoExt(repo *github.Repository, enableRepoGit, iss
 	}
 
 	if enableRepoGit {
-		repoPath := fmt.Sprintf("/tmp/%s", repo.GetName())
+		func() {
+			repoPath := fmt.Sprintf("/tmp/%s", repo.GetName())
 
-		// clone
-		if err := runCmd("git", []string{"clone", repo.GetCloneURL(), repoPath}); err != nil {
-			return err
-		}
-		// zip .git
-		if err := runCmd("zip", []string{"-r", r.repoGitZipPath(repo), repoPath + "/.git"}); err != nil {
-			return err
-		}
+			// clone
+			if err := runCmd("git", []string{"clone", repo.GetCloneURL(), repoPath}); err != nil {
+				fmt.Printf("[%s] clone fail: %s\n", "repo_git", err)
+				return
+			}
+			// zip .git
+			if err := runCmd("zip", []string{"-r", r.repoGitZipPath(repo), repoPath + "/.git"}); err != nil {
+				fmt.Printf("[%s] zip fail: %s\n", "repo_git", err)
+				return
+			}
+		}()
 	}
-
-	return nil
 }
 
 func saveDataList[T any](
