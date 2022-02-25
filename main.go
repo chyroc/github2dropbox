@@ -25,11 +25,8 @@ func NewOption() *internal.Option {
 	r.EnableGist = os.Getenv("INPUT_ENABLE_GIST") == "true"
 	r.EnableIssue = os.Getenv("INPUT_ENABLE_ISSUE") == "true"
 
-	if r.GithubToken == "" {
-		r.GithubToken = os.Getenv("GITHUB_TOKEN")
-	}
 	if r.DropboxToken == "" {
-		r.DropboxToken = os.Getenv("DROPBOX_TOKEN")
+		r.DropboxToken = os.Getenv("INPUT_DROPBOX_TOKEN")
 	}
 	if s, _ := exec.LookPath(r.DropboxCli); s != "" {
 		r.DropboxCli = s

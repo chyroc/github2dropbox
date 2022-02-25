@@ -31,7 +31,3 @@ inputs:
 runs:
   using: docker
   image: Dockerfile
-  env:
-    DROPBOX_TOKEN: "${{ inputs.DROPBOX_TOKEN }}"
-    DROPBOX_PATH: "${{ inputs.DROPBOX_PATH }}"
-
