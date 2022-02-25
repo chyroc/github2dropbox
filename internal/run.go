@@ -5,6 +5,7 @@ import (
 )
 
 func (r *Backup) Run() {
+	_ = r.SaveStar()
 	_ = r.SaveRepos()
 }
 
@@ -38,4 +39,31 @@ func (r *Backup) SaveRepos() error {
 	}
 
 	return nil
+}
+
+func (r *Backup) SaveStar() error {
+	if r.IsStarProcessedRecently() {
+		fmt.Printf("[star] processed recently, skip\n")
+		return nil
+	}
+
+	stars, err := r.AllStar()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("[star] get star, count: %d\n", len(stars))
+
+	if err = r.SaveStarsJson(stars); err != nil {
+		fmt.Printf("[star] save json fail: %s\n", err)
+		return err
+	}
+	r.SetStarProcessedRecently()
+
+	if err = r.Upload(r.starJsonDirPath()); err != nil {
+		fmt.Printf("[star] upload to dropbox fail[ignore err]: %s\n", err)
+	} else {
+		fmt.Printf("[star] upload to dropbox success\n")
+	}
+
+	return r.UploadMeta()
 }

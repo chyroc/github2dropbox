@@ -16,8 +16,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	// fmt.Println("start download dropbox old data")
-	// _ = r.DownloadDropboxBackupDir()
-
 	r.Run()
 }

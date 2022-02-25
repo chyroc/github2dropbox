@@ -28,6 +28,25 @@ func (r *Backup) AllRepo() ([]*github.Repository, error) {
 	return resp, nil
 }
 
+func (r *Backup) AllStar() ([]*github.StarredRepository, error) {
+	page := 1
+	var stars []*github.StarredRepository
+	for page > 0 {
+		starredRepository, resp, err := r.githubClient.Activity.ListStarred(context.Background(), "", &github.ActivityListStarredOptions{
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: 100,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		stars = append(stars, starredRepository...)
+		page = resp.NextPage
+	}
+	return stars, nil
+}
+
 func (r *Backup) SelfUser() (*github.User, error) {
 	user, _, err := r.githubClient.Users.Get(context.Background(), "")
 	return user, err

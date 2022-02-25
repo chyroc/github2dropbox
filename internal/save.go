@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/google/go-github/v42/github"
 )
@@ -17,6 +18,14 @@ func (r *Backup) repoPath(repo *github.Repository) string {
 
 func (r *Backup) repoJsonPath(repo *github.Repository) string {
 	return fmt.Sprintf("%s/%s/repo/%s/repo.json", r.backupDir, r.self.GetLogin(), repo.GetName())
+}
+
+func (r *Backup) starJsonPath(star *github.StarredRepository) string {
+	return fmt.Sprintf("%s/%s/star/%s.json", r.backupDir, r.self.GetLogin(), strings.ReplaceAll(star.GetRepository().GetFullName(), "/", "_"))
+}
+
+func (r *Backup) starJsonDirPath() string {
+	return fmt.Sprintf("%s/%s/star", r.backupDir, r.self.GetLogin())
 }
 
 func (r *Backup) repoZipPath(repo *github.Repository) string {
@@ -31,6 +40,23 @@ func (r *Backup) SaveRepoJson(repo *github.Repository) {
 		return
 	}
 	_ = ioutil.WriteFile(file, bs, 0o644)
+}
+
+func (r *Backup) SaveStarsJson(stars []*github.StarredRepository) error {
+	for idx, v := range stars {
+		file := r.starJsonPath(v)
+		if idx == 0 {
+			if err := os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
+				return err
+			}
+		}
+		bs, err := json.MarshalIndent(v, "", "  ")
+		if err != nil {
+			return err
+		}
+		_ = ioutil.WriteFile(file, bs, 0o644)
+	}
+	return nil
 }
 
 func (r *Backup) SaveRepoZip(repo *github.Repository) {

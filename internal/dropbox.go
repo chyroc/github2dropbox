@@ -34,17 +34,11 @@ func (r *Backup) UploadMeta() error {
 		return err
 	}
 	file := fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.backupDir, r.self.GetLogin())
-	if err = os.MkdirAll(filepath.Dir(file), 0755); err != nil {
+	if err = os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(file, bs, 0644); err != nil {
+	if err = ioutil.WriteFile(file, bs, 0o644); err != nil {
 		return err
 	}
-	return runCmd(r.dropboxCli,
-		[]string{
-			"upload",
-			"--token", r.dropboxToken,
-			file,
-			r.dropboxPath + file,
-		})
+	return r.Upload(file)
 }

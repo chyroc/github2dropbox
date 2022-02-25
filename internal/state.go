@@ -26,13 +26,21 @@ func (r *Backup) SetRepoProcessedRecently(repoName string) {
 	r.meta.Repos[repoName] = r.genProcessedRecently()
 }
 
+func (r *Backup) IsStarProcessedRecently() bool {
+	return r.isProcessedRecently(r.meta.Star)
+}
+
+func (r *Backup) SetStarProcessedRecently() {
+	r.meta.Star = r.genProcessedRecently()
+}
+
 func (r *Backup) metaPath() string {
 	return fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.backupDir, r.self.GetLogin())
 }
 
 func (r *Backup) loadMeta() *Meta {
 	file := r.metaPath()
-	var meta = Meta{Repos: map[string]*LastProcessed{}}
+	meta := Meta{Repos: map[string]*LastProcessed{}}
 
 	bs, err := ioutil.ReadFile(file)
 	if err != nil {
