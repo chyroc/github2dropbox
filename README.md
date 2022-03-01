@@ -92,8 +92,9 @@ GitHub/
 
 ## Change Log
 
-
+- 2022-03-01 v0.3.0
+  - Docs: update readme
+- 2022-02-25 v0.2.0
+  - Add: support for gist, star, follower, following, git, issue and issue comment
 - 2022-02-24 v0.1.0
   - Initial release
-- 2022-02-25 v0.2.0
-  - Add support for gist, star, follower, following, git, issue and issue comment
