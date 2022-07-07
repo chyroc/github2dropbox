@@ -89,7 +89,8 @@ func (r *Backup) setProcessedRecentlyByTitle(title, name string) {
 }
 
 func (r *Backup) metaPath() string {
-	return fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.BackupDir, r.self.GetLogin())
+	return fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.BackupDir,
+		sanitizedFilePath(r.self.GetLogin()))
 }
 
 func (r *Backup) loadMeta() *Meta {

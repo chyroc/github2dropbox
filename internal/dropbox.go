@@ -33,7 +33,8 @@ func (r *Backup) UploadMeta() error {
 	if err != nil {
 		return err
 	}
-	file := fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.BackupDir, r.self.GetLogin())
+	file := fmt.Sprintf("%s/%s/github2dropbox/meta.json", r.BackupDir,
+		sanitizedFilePath(r.self.GetLogin()))
 	if err = os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
 		return err
 	}

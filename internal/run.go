@@ -90,7 +90,7 @@ func (r *Backup) internalSaveRepoExt(repo *github.Repository, enableRepoGit, iss
 
 	if enableRepoGit {
 		func() {
-			repoPath := fmt.Sprintf("/tmp/%s", repo.GetName())
+			repoPath := fmt.Sprintf("/tmp/%s", sanitizedFilePath(repo.GetName()))
 			cloneURL := fmt.Sprintf("https://git:%s@github.com/%s.git", r.GithubToken, repo.GetFullName())
 
 			// clone
