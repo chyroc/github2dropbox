@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 60 # timeout after 60 minutes
     steps:
       - name: Backup
-        uses: chyroc/github2dropbox@v0.2.0
+        uses: chyroc/github2dropbox@v0.4.0
         with:
           DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }} # dropbox token
           GITHUB_TOKEN: ${{ secrets.G_TOKEN }} # github token
@@ -92,6 +92,8 @@ GitHub/
 
 ## Change Log
 
+- 2022-07-18 v0.4.0
+  - Fix: check that there are no path separators in GitHub API results.
 - 2022-03-01 v0.3.0
   - Docs: update readme
 - 2022-02-25 v0.2.0
